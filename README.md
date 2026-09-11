@@ -1,139 +1,159 @@
-# SmartToys — Business Review & Growth Strategy
+# 📊 SmartToys — Business Review & Growth Strategy
 
-Phân tích **472,871 phiên truy cập** và **32,313 đơn hàng** của một doanh nghiệp e-commerce trong 3 năm (03/2012 – 03/2015), nhằm tìm nguyên nhân trượt lợi nhuận và các nút thắt tăng trưởng.
+Deep-dive analysis of **472,871 web sessions** and **32,313 orders** from an e-commerce business over three years (Mar 2012 – Mar 2015), tracing where profit leaks and where growth is blocked.
 
-📊 **[Xem báo cáo slide (PDF)](reports/SmartToys_Business_Review.pdf)** · 📓 **[Notebook đầy đủ](notebooks/smarttoys_business_review.ipynb)**
+📑 **[View the slide report (PDF)](reports/SmartToys_Business_Review.pdf)** · 📓 **[Full notebook](notebooks/smarttoys_business_review.ipynb)** · 🏗️ **[Analytics engineering pipeline](https://github.com/duyngoduyngo/smarttoys-analytics-pipeline)**
+
+| Headline finding | Figure |
+|---|---|
+| Customers who buy exactly once | **98.14%** |
+| Revenue lost to poor mobile conversion | **~$473,000** |
+| Click-through to the most profitable product | **1.00%** |
 
 ---
 
-## 1. Bối cảnh & Mục tiêu
+## 1. Context & Objectives
 
-SmartToys kinh doanh gấu bông cao cấp. Sau 3 năm vận hành, doanh số tăng trưởng nhưng Ban Giám đốc lo ngại về các "điểm mù": chi phí quảng cáo tăng mà không rõ nhóm khách nào bền vững, tỷ lệ hoàn hàng bất thường ở một số dòng sản phẩm, và luồng chuyển đổi trên website có dấu hiệu tắc nghẽn.
+SmartToys sells premium teddy bears online. After three years of operation revenue is growing, but leadership is concerned about blind spots: advertising spend keeps rising without clarity on which customers are worth acquiring, refund rates look abnormal on certain product lines, and the purchase funnel shows signs of friction.
 
-> **Câu hỏi trung tâm:** Làm thế nào để tối ưu hóa lợi nhuận và trải nghiệm khách hàng trong năm tới?
+> **Central question:** How do we improve profitability and customer experience over the next year?
 
-Ba mục tiêu cụ thể:
+Three concrete objectives:
 
-- **Giải mã hiện tượng trượt lợi nhuận** — bóc tách khoảng cách giữa doanh thu gộp và lợi nhuận thực sau giá vốn và hoàn tiền
-- **Tìm nút thắt chuyển đổi** — xác định khách rơi rụng ở bước nào, trên thiết bị nào, từ nguồn nào
-- **Tìm đòn bẩy tăng trưởng** — đánh giá cơ hội nâng AOV và giữ chân khách hàng
+- **Explain the margin gap** — separate gross revenue from what actually survives COGS and refunds
+- **Locate the conversion bottleneck** — identify which step, which device, and which traffic source loses customers
+- **Find the growth lever** — evaluate opportunities to raise AOV and retain customers
 
-## 2. Dữ liệu & Techstack
+## 2. Data & Tech Stack
 
-**Dữ liệu:** 6 bảng quan hệ — `website_sessions`, `website_pageviews`, `orders`, `order_items`, `order_item_refunds`, `products`. Tổng hơn 1.1 triệu bản ghi pageview.
+**Data:** six relational tables — `website_sessions`, `website_pageviews`, `orders`, `order_items`, `order_item_refunds`, `products`. Over 1.1 million pageview records.
 
-**Ngôn ngữ & thư viện:** Python · pandas · numpy · matplotlib · seaborn · plotly
+**Language & libraries:** Python · pandas · numpy · matplotlib · seaborn · plotly
 
-**Kỹ thuật phân tích:**
+**Analytical techniques:**
 
-| Kỹ thuật | Trả lời câu hỏi |
+| Technique | Question it answers |
 |---|---|
-| Unit Economics | Sản phẩm nào thực sự sinh lời sau giá vốn và hoàn tiền? |
-| Pareto & phân loại ABC | Mức độ tập trung rủi ro ở sản phẩm, kênh, khách hàng? |
-| RFM Segmentation | Ai là khách giá trị cao? |
-| Cohort Retention | Khách có quay lại không? |
-| Sankey Journey | Traffic đi theo đường nào từ nguồn tới sản phẩm? |
-| Conversion Funnel | Khách rơi rụng ở bước nào? |
-| Market Basket Analysis | Sản phẩm nào thường được mua kèm? |
+| Unit Economics | Which product is actually profitable after COGS and refunds? |
+| Pareto & ABC classification | How concentrated is risk across products, channels, customers? |
+| RFM Segmentation | Who are the high-value customers? |
+| Cohort Retention | Do customers come back? |
+| Sankey Journey | How does traffic flow from source to product? |
+| Conversion Funnel | Where do customers drop off? |
+| Market Basket Analysis | Which products get bought together? |
 
-## 3. Bức tranh tổng thể
+## 3. The Overall Picture
 
-| Chỉ số | Giá trị |
+| Metric | Value |
 |---|---|
-| Doanh thu gộp | $1,938,509.75 |
-| Giá vốn (COGS) | $722,370.25 — 37.26% doanh thu |
-| Hoàn tiền | $85,338.69 — 4.40% doanh thu |
-| **Lợi nhuận ròng** | **$1,130,800.81 — biên 58.33%** |
-| Tỷ lệ chuyển đổi | 6.83% |
+| Gross revenue | $1,938,509.75 |
+| COGS | $722,370.25 — 37.26% of revenue |
+| Refunds | $85,338.69 — 4.40% of revenue |
+| **Net profit** | **$1,130,800.81 — 58.33% margin** |
+| Conversion rate | 6.83% |
 | AOV | $59.99 |
 
-## 4. Ba phát hiện chính
+## 4. Three Key Findings
 
-### 4.1. Doanh nghiệp gần như không có vòng đời khách hàng
+### 4.1. The business has almost no customer lifecycle
 
-**98.14%** khách chỉ mua đúng một lần (31,105 trong tổng số 31,696). Tỷ lệ mua lại là **1.86%**, retention tháng thứ nhất **0.84%**, tháng thứ ba còn **0.20%**.
+**98.14%** of customers buy exactly once (31,105 out of 31,696). Repeat rate is **1.86%**, month-1 retention **0.84%**, and month-3 retention **0.20%**.
 
-Doanh thu trung bình mỗi khách là **$61.16** — gần như bằng đúng AOV. Nói cách khác: mỗi khách chỉ đem về một đơn hàng rồi biến mất, nên chi phí quảng cáo bỏ ra để kéo họ về chỉ được thu hồi qua duy nhất đơn đó. Mọi tăng trưởng đều phải mua bằng ngân sách mới.
+Average revenue per customer is **$61.16** — essentially equal to AOV. In other words: each customer delivers a single order and disappears, so the advertising spend used to acquire them is recovered through that one order alone. Every unit of growth has to be purchased with fresh budget.
 
 ![Cohort Retention Rate](reports/figures/06b_cohort_retention.png)
 
-### 4.2. Mobile là lỗ hổng tốn kém nhất, và đang xấu đi
+### 4.2. Mobile is the most expensive gap — and it is widening
 
-Mobile chiếm **30.8%** traffic nhưng tỷ lệ chuyển đổi chỉ **3.09%**, so với **8.50%** của Desktop — chênh **2.75 lần**, và kém hơn ở **toàn bộ** các bước của phễu.
+Mobile accounts for **30.8%** of traffic but converts at just **3.09%**, against **8.50%** on desktop — a **2.75x** gap, and mobile underperforms at **every** funnel step.
 
-Khoảng cách này xuất hiện ở **cả 4 nguồn traffic**, không trừ nguồn nào. Đây là bằng chứng quan trọng: nếu do chất lượng traffic, mức chênh sẽ khác nhau giữa các kênh. Việc nó đồng đều chỉ ra nguyên nhân nằm ở chính giao diện website.
+Crucially, the gap appears across **all four traffic sources** without exception. If it were a traffic-quality problem, the gap would vary by channel. Its uniformity points to the website interface itself.
 
-Củng cố thêm: tỷ lệ mua lại của khách Mobile (1.63%) gần bằng Desktop (1.90%). Khách Mobile không kém chất lượng — họ chỉ khó mua hàng hơn.
+Supporting evidence: repeat rate on mobile (1.63%) is close to desktop (1.90%). Mobile customers are not lower quality — they simply have a harder time buying.
 
-Nếu Mobile đạt được CR của Desktop, doanh nghiệp có thêm **7,889 đơn**, tương đương khoảng **$473,000** doanh thu trong 3 năm. Và trong 6 tháng gần nhất, khoảng cách drop-off tại bước thanh toán còn **nới rộng từ 10.3 lên 14.2 điểm phần trăm**.
+If mobile matched desktop's conversion rate, the business would gain **7,889 orders**, roughly **$473,000** in revenue over three years. And over the last six months, the checkout drop-off gap **widened from 10.3 to 14.2 percentage points**.
 
-![Phễu chuyển đổi Desktop vs Mobile](reports/figures/09_funnel_device.png)
+![Desktop vs Mobile conversion funnel](reports/figures/09_funnel_device.png)
 
-### 4.3. Sản phẩm sinh lời nhất đang bị chôn vùi
+### 4.3. The most profitable product is buried
 
-`The Hudson River Mini bear` có **biên lợi nhuận ròng cao nhất danh mục (67.08%)** và **tỷ lệ hoàn hàng thấp nhất (1.28%)**. Khi khách đã xem trang chi tiết, **65.13%** thêm vào giỏ — cũng là cao nhất, vượt sản phẩm chủ lực `Mr. Fuzzy` (43.04%) tới 22 điểm phần trăm.
+`The Hudson River Mini bear` has the **highest net margin in the catalogue (67.08%)** and the **lowest refund rate (1.28%)**. Once a customer reaches its detail page, **65.13%** add it to cart — also the highest, beating flagship `Mr. Fuzzy` (43.04%) by 22 percentage points.
 
-Nhưng chỉ **1.00%** khách xem trang danh mục click vào nó — thấp hơn `Mr. Fuzzy` **62 lần**.
+Yet only **1.00%** of catalogue visitors click into it — **62x** fewer than `Mr. Fuzzy`.
 
-Đây không phải vấn đề sản phẩm kém hấp dẫn mà là vấn đề hiển thị. Trong khi đó `Mr. Fuzzy` chiếm 62.47% doanh thu nhưng lại có biên ròng **thấp nhất (55.91%)**, do giá vốn cao cộng 1,237 đơn hoàn tiền làm mất $61,837.63.
+This is not a desirability problem, it is a visibility problem. Meanwhile `Mr. Fuzzy` generates 62.47% of revenue but carries the **lowest net margin (55.91%)**, driven by high COGS plus 1,237 refunded orders costing $61,837.63.
 
-![CTR qua từng bước phễu theo sản phẩm](reports/figures/11b_funnel_by_product.png)
+![CTR by funnel step and product](reports/figures/11b_funnel_by_product.png)
 
-## 5. Các phát hiện đáng chú ý khác
+## 5. Other Notable Findings
 
-- **Hoàn hàng đạt đỉnh vào mùa hè, không phải mùa lễ hội.** Tháng 8 và 9 cùng ở mức **7.76%** — gấp 2.4 lần tháng 10 (3.17%), trong khi tháng 11–12 bán nhiều nhất lại hoàn thấp hơn trung bình. Vì tháng 6–9 là mùa thấp điểm, nguyên nhân không thể là quá tải công suất.
-- **Sản phẩm hoàn hàng nhiều nhất theo tỷ lệ là `Birthday Sugar Panda` (6.04%)**, không phải `Mr. Fuzzy` — khoản hoàn tiền ăn mất 9.67% lợi nhuận của chính nó.
-- **Bán chéo nâng AOV 75.6%** ($89.25 so với $50.82), chiếm 23.87% số đơn nhưng đóng góp 35.51% doanh thu. Tuy nhiên **cả 6 cặp sản phẩm đều có Lift < 1**, tức không có liên kết dương thực sự.
-- **Phân loại ABC khách hàng không tuân theo Pareto:** cần tới 74.40% số khách mới đạt 80% doanh thu — hệ quả trực tiếp của việc không ai mua lại.
+- **Refunds peak in summer, not the holiday season.** August and September both hit **7.76%** — 2.4x higher than October (3.17%) — while November and December, the highest-volume months, sit below average. Since June–September is the low season, capacity overload cannot be the cause.
+- **The highest refund rate by proportion belongs to `Birthday Sugar Panda` (6.04%)**, not `Mr. Fuzzy` — refunds consume 9.67% of that product's own profit.
+- **Cross-sell lifts AOV by 75.6%** ($89.25 vs $50.82), making up 23.87% of orders but 35.51% of revenue. However, **all six product pairs have Lift < 1**, meaning no genuine positive association.
+- **Customer ABC classification does not follow Pareto:** it takes 74.40% of customers to reach 80% of revenue — a direct consequence of nobody buying twice.
 
-## 6. Khuyến nghị
+## 6. Recommendations
 
-| # | Hành động | Căn cứ dữ liệu | Bộ phận | Kỳ vọng | Ưu tiên |
+| # | Action | Data basis | Owner | Expected impact | Priority |
 |---|---|---|---|---|---|
-| 1 | Tái thiết kế luồng thanh toán Mobile: rút gọn form `/billing`, tích hợp ví điện tử | Drop-off Mobile 47.72% vs Desktop 33.55%, khoảng cách đang nới rộng | Product | Thu hồi ~$150K/năm | Cao |
-| 2 | Đưa Hudson lên vị trí nổi bật trang danh mục; gợi ý mua kèm tại Cart | Chỉ 1.00% click nhưng 65.13% thêm giỏ; biên 67.08% | Product & Marketing | Nâng tỷ trọng doanh thu Hudson từ 7.76% lên 15% | Cao |
-| 3 | Rà soát chất lượng & đóng gói Panda và Mr. Fuzzy; bổ sung trường lý do hoàn hàng | Panda refund 6.04%; Mr. Fuzzy mất $61,838 (72.5% tổng tiền hoàn) | Vận hành | Giảm refund dưới 3%, tiết kiệm ~$40K | Cao |
-| 4 | Siết kiểm soát đóng gói & lưu kho tháng 6–9 | Refund tháng 8–9 đạt 7.76%, gấp 2.4 lần tháng 10 | Vận hành & Kho vận | Đưa refund mùa hè về 4.32% | Cao |
-| 5 | Xây chương trình mua lại: email sau 30 ngày, ưu đãi đơn thứ hai | Repeat rate 1.86%; khách mua lần 2 đạt $122–188 vs $61 | CRM | Nâng repeat rate lên 5% | Trung bình |
-| 6 | Rà soát `/lander-3`, áp dụng thiết kế của `/lander-5` | Drop-off 96.61% trên 79,000 phiên, cao nhất site | Product | Thêm khoảng 5,300 đơn | Trung bình |
-| 7 | Cắt ngân sách `socialbook`, dồn cho `direct/organic` | Socialbook 1.15% doanh thu, repeat 1.17%, CR Mobile 0.83% | Performance Media | Giảm CAC lãng phí | Trung bình |
-| 8 | Bổ sung dashboard theo dõi LTV/CAC theo cohort | Chưa có chỉ số đo chất lượng khách hàng dài hạn | Data | Đo được hiệu quả của mục 5 | Trung bình |
+| 1 | Redesign the mobile checkout flow: simplify `/billing`, integrate digital wallets | Mobile drop-off 47.72% vs desktop 33.55%, gap widening | Product | Recover ~$150K/year | High |
+| 2 | Promote Hudson on the catalogue page; add cart-stage cross-sell prompts | Only 1.00% click-through but 65.13% add-to-cart; 67.08% margin | Product & Marketing | Lift Hudson revenue share from 7.76% to 15% | High |
+| 3 | Audit quality and packaging for Panda and Mr. Fuzzy; add a refund-reason field | Panda refund 6.04%; Mr. Fuzzy lost $61,838 (72.5% of all refunds) | Operations | Cut refund rate below 3%, save ~$40K | High |
+| 4 | Tighten packaging and warehouse controls June–September | Refund rate 7.76% in Aug–Sep, 2.4x October | Ops & Logistics | Bring summer refunds to 4.32% | High |
+| 5 | Launch a repeat-purchase programme: 30-day email, second-order incentive | Repeat rate 1.86%; second-time buyers average $122–188 vs $61 | CRM | Raise repeat rate to 5% | Medium |
+| 6 | Audit `/lander-3`, apply the `/lander-5` design | 96.61% drop-off across 79,000 sessions, highest on site | Product | ~5,300 additional orders | Medium |
+| 7 | Cut `socialbook` spend, reallocate to `direct/organic` (SEO) | Socialbook 1.15% of revenue, 1.17% repeat, 0.83% mobile CR | Performance Media | Reduce wasted CAC | Medium |
+| 8 | Add an LTV/CAC-by-cohort dashboard | No metric currently tracks long-term customer quality | Data | Measure impact of item 5 | Medium |
 
-## 7. Giới hạn của phân tích
+## 7. Limitations
 
-Ba điểm cần nêu rõ khi diễn giải kết quả:
+Three points to state plainly when interpreting these results:
 
-1. **Phân khúc RFM bị hạn chế bởi dữ liệu.** Cột `frequency` chỉ có 3 giá trị duy nhất (1, 2, 3), nên thang F thực chất chỉ 3 bậc thay vì 5. Tên các segment phản ánh chủ yếu Recency và Monetary, không phải mức độ trung thành thực sự.
-2. **Market Basket không cho thấy liên kết dương.** Toàn bộ 6 cặp sản phẩm đều có Lift < 1, do `Mr. Fuzzy` quá phổ biến nên kéo Lift của mọi cặp xuống. Khuyến nghị bán chéo ở mục 2 dựa trên Confidence và biên lợi nhuận, không dựa trên Lift.
-3. **Chưa có dữ liệu lý do hoàn hàng.** Bảng `order_item_refunds` không có trường lý do, lô hàng hay nhà cung cấp. Các nguyên nhân nêu ở phần hoàn hàng là **giả thuyết cần kiểm chứng**, không phải kết luận.
+1. **RFM segmentation is constrained by the data.** The `frequency` column holds only three distinct values (1, 2, 3), so the F score resolves to three tiers rather than five. Segment names therefore reflect Recency and Monetary more than genuine loyalty.
+2. **Market Basket shows no positive association.** All six product pairs have Lift < 1, because `Mr. Fuzzy` is so common that it drags every pair's lift down. The cross-sell recommendation in item 2 rests on Confidence and margin, not Lift.
+3. **No refund-reason data exists.** The `order_item_refunds` table has no reason, batch, or supplier field. The causes proposed in the refund section are **hypotheses requiring verification**, not conclusions.
 
-## 8. Cấu trúc repo
+## 8. Repository Structure
 
 ```
 smarttoys-ecommerce-analytics/
 ├── README.md
 ├── requirements.txt
 ├── notebooks/
-│   └── smarttoys_business_review.ipynb    # Toàn bộ phân tích
+│   └── smarttoys_business_review.ipynb    # Full analysis
 ├── data/
-│   └── raw/                                # 6 file nguồn
+│   └── raw/                                # 6 source files
 └── reports/
-    ├── SmartToys_Business_Review.pdf       # Báo cáo slide
+    ├── SmartToys_Business_Review.pdf       # Slide report
     ├── SmartToys_Business_Review.pptx
-    └── figures/                            # 20 biểu đồ PNG
+    └── figures/                            # 20 exported charts
 ```
 
-## 9. Cách chạy lại
+## 9. How to Reproduce
 
 ```bash
-git clone https://github.com/[username]/smarttoys-ecommerce-analytics.git
+git clone https://github.com/duyngoduyngo/smarttoys-ecommerce-analytics.git
 cd smarttoys-ecommerce-analytics
 pip install -r requirements.txt
 jupyter notebook notebooks/smarttoys_business_review.ipynb
 ```
 
-Notebook tự nhận môi trường: chạy trên Google Colab thì mount Drive, chạy local thì dùng đường dẫn tương đối trong repo. Hàm `load()` tự nhận cả file `.csv` lẫn `.csv.gz`.
+The notebook detects its environment: on Google Colab it mounts Drive, locally it uses relative paths inside the repo. The `load()` helper accepts both `.csv` and `.csv.gz`.
+
+## 10. Related Work
+
+This same dataset is modeled into a tested data warehouse using **dlt + DuckDB + dbt**, with 13 models across a bronze/silver/gold architecture and **93 automated data tests** — including tests derived from the exact data-quality problems encountered during this analysis.
+
+🏗️ **[smarttoys-analytics-pipeline](https://github.com/duyngoduyngo/smarttoys-analytics-pipeline)**
+
+All eleven headline metrics in that pipeline match this notebook exactly, computed through two fully independent paths.
+
+## 11. License
+
+Code in this repository is released under the [MIT License](LICENSE).
+
+The dataset is simulated data used for educational purposes and is not covered by that license.
 
 ---
 
-*Thực hiện bởi Ngô Đức Duy · https://www.linkedin.com/in/duyngoduyngo/ · duyngoduyngo@gmail.com *
+*Built by **Ngo Duc Duy** · [LinkedIn](https://www.linkedin.com/in/duyngoduyngo/) · duyngoduyngo@gmail.com*
